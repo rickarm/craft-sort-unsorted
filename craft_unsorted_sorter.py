@@ -147,10 +147,8 @@ def get_document_content(doc_id: str) -> str:
         response.raise_for_status()
         data = response.json()
 
-        # Extract text content from response (markdown field contains the content)
-        markdown = data.get("markdown", "")
-
-        # Also get content from nested blocks if available
+        # Extract text content from response, including nested blocks.
+        # extract_text() reads the top-level "markdown" field plus any children.
         def extract_text(block):
             text = block.get("markdown", "")
             if "content" in block and isinstance(block["content"], list):
@@ -355,15 +353,15 @@ def run_automation():
                                 logger.info(f"  ✓ Moved to: {destination}")
                                 stats["moved"] += 1
                             else:
-                                logger.warning(f"  ⚠ Tag added but move failed. Check logs.")
+                                logger.warning("  ⚠ Tag added but move failed. Check logs.")
                                 stats["errors"] += 1
                         else:
                             logger.warning(f"  ⚠ Tag added. Folder {destination} not found—manual move may be needed.")
                     else:
-                        logger.error(f"  ✗ Failed to tag document")
+                        logger.error("  ✗ Failed to tag document")
                         stats["errors"] += 1
                 else:
-                    logger.info(f"  → No matching tag. Stays in Unsorted.")
+                    logger.info("  → No matching tag. Stays in Unsorted.")
                     # Optionally tag as #general
                     if add_tag_to_document(doc_id, "general"):
                         stats["tagged"] += 1
